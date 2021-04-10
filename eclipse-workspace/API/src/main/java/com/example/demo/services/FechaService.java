@@ -22,6 +22,10 @@ public Fechas guardarFecha(Fechas compra) {
 		return fecharepository.save(compra);
 	}
 
+public String borrarFechas() {
+	 fecharepository.deleteAll();
+	 return "Fecha Borradas";
+}
 
 public ArrayList<Fechas> obtenerFechas() {
 	return (ArrayList<Fechas>) fecharepository.findAll();

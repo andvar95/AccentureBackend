@@ -142,6 +142,7 @@ public HashMap<String, Object> actualizarCompra(@PathVariable("id_usr") Long usr
 		}
 	else {
 		//si no hay productos debo crear el carrito
+		System.out.print("Creo");
 		compra.setPrecioSubTotal(compra.getCantidad()*compra.getProductos().getPrecio());
 		fechas.setTotalCompra(compra.getCantidad()*compra.getProductos().getPrecio());
 		Date ahora = new Date();  
@@ -191,12 +192,14 @@ public HashMap<String, Object> eliminarCompra(@PathVariable("id_usr") Long usrId
 				//verifico que se haya cumplido el tiempo de limite par aeliminar
 				if(diferencia>0) {
 				salida = this.comprasservice.eliminarCarrito();
+				this.fechaservice.borrarFechas();
 				//si hay tiempo limpio el carrito
 				}
 				else {
 					fechaActual.getTotalCompra();
 					salida = "Ya pasaron la 12 horas, debe cancelar "+fechaActual.getTotalCompra()*.10;
 					String s = this.comprasservice.eliminarCarrito();
+					this.fechaservice.borrarFechas();
 					//sino hay tiempo limpio el carrito pero genero una factura del 10% del total
 				}
 			
