@@ -8,20 +8,20 @@ Acontinuación se muestra un instructivo de como usar la API
 
 
 
-# Crear #Usuario
+# Crear # Usuario
 URL = http://localhost:8080/usuario - METODO POST 
 
 Json_body = {  "cedula": 1102866527,"nombre": "Andres","email": "Andres@gmail.com","direccion": "calle 27" }
 
 
-#Crear un producto 
+# Crear # un # producto 
 
 URL=  http://localhost:8080/productos - METODO POST
 
 Json_Body = {"nombre": "Pollo","precio":2000}
 
 
-#Crear/Editar Carrito 
+# Crear/Editar Carrito 
 URL = http://localhost:8080/editarCompra/{id_usuario} - METODO POST 
 Json_Body = {
     "usuario": {
