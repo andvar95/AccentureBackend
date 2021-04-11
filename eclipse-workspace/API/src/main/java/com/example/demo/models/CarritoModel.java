@@ -15,8 +15,8 @@ import javax.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Entity
-@Table(name = "fechas")
-public class Fechas {
+@Table(name = "carrito")
+public class CarritoModel {
 	
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,8 +33,19 @@ public class Fechas {
 	private Date fechaFinEliminar;
 	private Double totalCompra;
 	
+	@OneToOne(mappedBy = "carrito")
+    private UsuarioModel usuario;
 	
 	
+	
+	public UsuarioModel getUsuario() {
+		return usuario;
+	}
+
+	public void setUsuario(UsuarioModel usuario) {
+		this.usuario = usuario;
+	}
+
 	public Date getFechaFinEliminar() {
 		return fechaFinEliminar;
 	}

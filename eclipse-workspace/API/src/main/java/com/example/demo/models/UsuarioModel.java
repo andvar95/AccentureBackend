@@ -1,14 +1,18 @@
 package com.example.demo.models;
 
 
+import java.util.ArrayList;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -25,15 +29,29 @@ public class UsuarioModel {
 	private String nombre;
     private String email;
     private String direccion;
+    
     @OneToMany(mappedBy="productos")
     Set<ComprasModel> compras;
+    
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "carrito", referencedColumnName = "id")
+    private CarritoModel carrito;
+    
   
     
    
 
 
 
-    public Long getId() {
+    public CarritoModel getCarrito() {
+		return carrito;
+	}
+
+	public void setCarrito(CarritoModel carrito) {
+		this.carrito = carrito;
+	}
+
+	public Long getId() {
  		return id;
  	}
 
@@ -47,6 +65,15 @@ public class UsuarioModel {
 
 	public void setCompras(Set<ComprasModel> compras) {
 		this.compras = compras;
+	}
+	
+	public void addCompras(ComprasModel compras) {
+		this.compras.add(compras);
+		System.out.println(this.compras.size());
+	}
+	
+	public void cleanCompras(ComprasModel compras) {
+		this.compras.clear();
 	}
 
 	public Long getCedula() {

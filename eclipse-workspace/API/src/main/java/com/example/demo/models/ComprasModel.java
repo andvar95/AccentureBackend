@@ -59,6 +59,8 @@ public class ComprasModel {
 		this.usuario = usuario;
 	}
 
+	
+	
 	public ProductosModel getProductos() {
 		return productos;
 	}
@@ -66,6 +68,8 @@ public class ComprasModel {
 	public void setProductos(ProductosModel productos) {
 		this.productos = productos;
 	}
+	
+	
 
 
 

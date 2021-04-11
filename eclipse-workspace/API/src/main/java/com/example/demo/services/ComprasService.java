@@ -22,7 +22,7 @@ public ComprasModel guardarCompra(ComprasModel compra) {
 	}
 
 
-public ArrayList<ComprasModel> detalleCompra(UsuarioModel usuarioModel) {
+public ArrayList<ComprasModel> buscarPorUsuario(UsuarioModel usuarioModel) {
 	
 	return comprasrepository.findByUsuario(usuarioModel);
 	
@@ -34,8 +34,12 @@ public Optional<ComprasModel> obtenerCompra(ProductosModel producto) {
 	
 }
 
-public String eliminarCarrito() {
-	comprasrepository.deleteAll();
+public Optional<ComprasModel> obtenerId(Long id) {
+	return comprasrepository.findById(id);
+}
+
+public String eliminarCarrito(Long id) {
+	comprasrepository.deleteById(id);
 	return "Carrito Vacio";
 }
 

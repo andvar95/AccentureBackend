@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;  
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.Set;
 import java.util.Calendar;
 import java.time.*; // Este paquete contiene LocalDate, LocalTime y LocalDateTime.
 import java.time.format.*;  // Este paquete contiene DateTimeFormatter.
@@ -21,11 +22,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.models.ComprasModel;
-import com.example.demo.models.Fechas;
+import com.example.demo.models.CarritoModel;
 import com.example.demo.models.ProductosModel;
 import com.example.demo.models.UsuarioModel;
 import com.example.demo.services.ComprasService;
-import com.example.demo.services.FechaService;
+import com.example.demo.services.CarritoService;
 import com.example.demo.services.UsuarioService;
 import java.time.LocalDate;
 
@@ -38,7 +39,7 @@ public class ComprasController {
 	@Autowired
 	UsuarioService usuarioservice;
 	@Autowired
-	FechaService fechaservice;
+	CarritoService carritoservice;
 	
 	
 
@@ -91,50 +92,83 @@ public HashMap<String, Object>  detalleCompra(@PathVariable("id_usr") Long usrId
 		
 
 //@RequestMapping()
+
 @PostMapping("/editarCompra/{id_usr}")
 public HashMap<String, Object> actualizarCompra(@PathVariable("id_usr") Long usrId, @RequestBody ComprasModel compra ) {
 
 	String salida = "";
-	Fechas fechas = new Fechas();
+	CarritoModel carrito = new CarritoModel();
+	
+	
 	
 	/* Este metodo es para adcionar productos o actualizar siempre y cuando  no se haya cumlplido el tiempo de 5 horas*/ 
 	
 	Optional<UsuarioModel> user  =  usuarioservice.obtenerUsuario(usrId);  //este metodo busca si existe el usuario
 	if(user.isPresent()) {  //si existe  verifico sus caompras 
 		
+		if(user.get().getCarrito()!=null) {
+			carrito = user.get().getCarrito();
+		}
+		
+		System.out.println("carrito "+user.get().getCarrito());
+		System.out.println("compras "+user.get().getCompras());
+		System.out.println("usr "+user.get().getId());
+		
+		ArrayList<ComprasModel> compraAntigua = this.comprasservice.buscarPorUsuario(user.get());	
+		System.out.println("comp "+compraAntigua.size());
 	
-	if(user.get().getCompras().size()>0) {  //si tieen compras debo verificar el tiempo
-		Fechas fechaCambiar = new Fechas();
-		Date finEd = new Date();
+	if(compraAntigua.size()>0) {  //si tieen compras debo verificar el tiempo
+		//CarritoModel fechaCambiar = new CarritoModel();
+		Date finEd = carrito.getFechaFinEditar();
 		Date now = new Date();
-		for(Fechas fe:this.fechaservice.obtenerFechas()) {
+		/*
+		for(CarritoModel fe:this.fechaservice.obtenerFechas()) {
 			fechaCambiar = fe;
-			finEd = fe.getFechaFinEditar();		}
+			finEd = fe.getFechaFinEditar();		}*/
 		
 		//obtengo la diferencia de fechas en horas
 		Long diferencia = (finEd.getTime() - now.getTime())/1000/60/60;
 		if(diferencia>0) {
 			
+			Boolean existe = false;
+			Long idCompra= 0L;
+			
+			for(ComprasModel cm:compraAntigua) {
+				if (cm.getProductos().getId()==compra.getProductos().getId()) {
+					idCompra= cm.getId();
+					existe = true;	
+				}
+			}
+			
+			
 			
 			//solicitud de existencia del producto ingresado
-			Optional<ComprasModel> compraExiste = this.comprasservice.obtenerCompra(compra.getProductos());
-			
+			//Optional<ComprasModel> compraExiste = this.comprasservice.obtenerCompra(compra.getProductos());
+			//System.out.println("existe"+compraExiste);
 			//si existe lo actualizo en cantidad y precio
-			if(compraExiste.isPresent()) {
+			if(existe) {
+				
+				
+				ComprasModel compraExiste = this.comprasservice.obtenerId(idCompra).get();
 				System.out.print("existe");
-				compraExiste.get().setCantidad(compraExiste.get().getCantidad()+compra.getCantidad());
-				compraExiste.get().setPrecioSubTotal(compraExiste.get().getCantidad()*compraExiste.get().getProductos().getPrecio());
-				System.out.println(fechaCambiar.getTotalCompra()+compraExiste.get().getCantidad()*compraExiste.get().getProductos().getPrecio());
-				fechaCambiar.setTotalCompra(fechaCambiar.getTotalCompra()+compraExiste.get().getCantidad()*compraExiste.get().getProductos().getPrecio());
-				this.fechaservice.guardarFecha(fechaCambiar);
-				comprasservice.guardarCompra(compraExiste.get());
+				compraExiste.setCantidad(compraExiste.getCantidad()+compra.getCantidad());
+				compraExiste.setPrecioSubTotal(compraExiste.getCantidad()*compraExiste.getProductos().getPrecio());
+				
+				System.out.println(carrito.getTotalCompra()+"\n"+compraExiste.getCantidad()*compraExiste.getProductos().getPrecio());
+				carrito.setTotalCompra(compraExiste.getCantidad()*compraExiste.getProductos().getPrecio());
+				this.carritoservice.guardarCarrito(carrito);
+				this.comprasservice.guardarCompra(compraExiste);
+				
 				salida = "Actualizado expira " +diferencia+ " horas";
 				
 			}
 			//si no existe adiciono el producto
 			else {
 				compra.setPrecioSubTotal(compra.getCantidad()*compra.getProductos().getPrecio());
+				carrito.setTotalCompra(carrito.getTotalCompra()+compra.getCantidad()*compra.getProductos().getPrecio());
 				 this.comprasservice.guardarCompra(compra);
+					this.carritoservice.guardarCarrito(carrito);
+				 
 				 salida = "Creado -Actualizar Carrito expira en "+diferencia +" horas";}
 		}
 		
@@ -144,22 +178,34 @@ public HashMap<String, Object> actualizarCompra(@PathVariable("id_usr") Long usr
 		//si no hay productos debo crear el carrito
 		System.out.print("Creo");
 		compra.setPrecioSubTotal(compra.getCantidad()*compra.getProductos().getPrecio());
-		fechas.setTotalCompra(compra.getCantidad()*compra.getProductos().getPrecio());
+		carrito.setTotalCompra(compra.getCantidad()*compra.getProductos().getPrecio());
+		
 		Date ahora = new Date();  
-		 fechas.setFechaIncio(ahora);//hora actual
+		 carrito.setFechaIncio(ahora);//hora actual
 		 Calendar editar = Calendar.getInstance();
 	      editar.setTime(ahora); 
 	      editar.add(Calendar.HOUR, 5);  //adiciono 5 horas para la fecha limite de editar
-		 fechas.setFechaFinEditar(editar.getTime());//guardo la fecha
+		 carrito.setFechaFinEditar(editar.getTime());//guardo la fecha
 		 
 		 Calendar eliminar = Calendar.getInstance();
 		 eliminar.setTime(ahora); //
 		 eliminar.add(Calendar.HOUR, 12);  //adiciono 5 horas para la fecha limite de editar
-		 fechas.setFechaFinEliminar(eliminar.getTime());//guardo la fecha
+		 carrito.setFechaFinEliminar(eliminar.getTime());//guardo la fecha
+		 this.carritoservice.guardarCarrito(carrito);
+		 System.out.print(compra.getPrecioSubTotal());
+		 comprasservice.guardarCompra(compra); //actualizo la bd
+		 user.get().addCompras(compra);
+		 System.out.print(user.get().getCompras());
+	
+		
+		 salida = "Creado Nuevo";	
+		 }
+	user.get().setCarrito(carrito);
+	this.usuarioservice.guardarUsuario(user.get());
+	};
 		 
-		 this.comprasservice.guardarCompra(compra); //actualizo la bd
-		 this.fechaservice.guardarFecha(fechas);
-		 salida = "Creado Nuevo";	}	};
+		 
+		
 	
 	HashMap<String, Object> map = new HashMap<>();
     map.put("Salida", salida);
@@ -175,35 +221,52 @@ public HashMap<String, Object> actualizarCompra(@PathVariable("id_usr") Long usr
 public HashMap<String, Object> eliminarCompra(@PathVariable("id_usr") Long usrId) {
 	
 	String salida = "";
-	Fechas fechaActual = new Fechas();
+	CarritoModel carrito = new CarritoModel();
 	
 	/*Metodo eliminar para la bd */
 	
 	Optional<UsuarioModel> user  =  usuarioservice.obtenerUsuario(usrId);
 	if(user.isPresent()) { // verifico si el usuario existe
-		if(user.get().getCompras().size()>0) {
-			Date finEliminar = new Date();
+		
+		System.out.println(user.get().getCompras().size());
+		ArrayList<ComprasModel> compraAntigua = this.comprasservice.buscarPorUsuario(user.get());
+		
+		if(compraAntigua.size()>0) {
+			
+			carrito = user.get().getCarrito();
+			Date finEliminar = carrito.getFechaFinEliminar();
 			Date now = new Date();
-			for(Fechas fe:this.fechaservice.obtenerFechas()) {
+			/*
+			for(CarritoModel fe:this.carrito.obtenerFechas()) {
 				fechaActual = fe;
 				finEliminar = fe.getFechaFinEliminar();}
+				
+				
+			*/
 			
+			user.get().setCarrito(null);
+			this.usuarioservice.guardarUsuario(user.get());
 				Long diferencia = (finEliminar.getTime() - now.getTime())/1000/60/60;
 				//verifico que se haya cumplido el tiempo de limite par aeliminar
 				if(diferencia>0) {
-				salida = this.comprasservice.eliminarCarrito();
-				this.fechaservice.borrarFechas();
+				
+
+				this.carritoservice.borrarCarrito(carrito.getId());
+				salida = "Eliminado satisfactoriamente";
 				//si hay tiempo limpio el carrito
 				}
 				else {
-					fechaActual.getTotalCompra();
-					salida = "Ya pasaron la 12 horas, debe cancelar "+fechaActual.getTotalCompra()*.10;
-					String s = this.comprasservice.eliminarCarrito();
-					this.fechaservice.borrarFechas();
+					carrito.getTotalCompra();
+					salida = "Ya pasaron la 12 horas, debe cancelar "+carrito.getTotalCompra()*.10;
+					
+					this.carritoservice.borrarCarrito(carrito.getId());
 					//sino hay tiempo limpio el carrito pero genero una factura del 10% del total
 				}
 			
-			
+			for(ComprasModel cc:compraAntigua) {
+				this.comprasservice.eliminarCarrito(cc.getId());
+			}
+				
 		}
 		else { //si el usuario no existe no hay productos ni pedido hecho
 			salida = "No hay proudctos";
