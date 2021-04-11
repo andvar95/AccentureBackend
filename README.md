@@ -7,20 +7,20 @@ de funcionamiento del desarrollo y la carpeta #springDB posee la base dato usada
 Acontinuación se muestra un instructivo de como usar la API
 
 
-\n
-#Crear Usuario
+
+# Crear #Usuario
 URL = http://localhost:8080/usuario - METODO POST 
 
 Json_body = {  "cedula": 1102866527,"nombre": "Andres","email": "Andres@gmail.com","direccion": "calle 27" }
 
-\n
+
 #Crear un producto 
 
 URL=  http://localhost:8080/productos - METODO POST
 
 Json_Body = {"nombre": "Pollo","precio":2000}
 
-\n
+
 #Crear/Editar Carrito 
 URL = http://localhost:8080/editarCompra/{id_usuario} - METODO POST 
 Json_Body = {
@@ -41,13 +41,13 @@ Json_Body = {
 }
 
 
-\n
+
 #Obtener Factura
 URL=  http://localhost:8080/editarCompra/{id_usuario}  - METODO GET
 
 
 
-\n
+
 #Eliminar Producto 
 URL = http://localhost:8080/editarCompra/{id_usuario} - METODO DELETE 
 Json_Body = {
@@ -69,10 +69,10 @@ Json_Body = {
 
 
 
-\n
+
 La API contiene 
 
-\n
+
 #Dos usuarios 
 ->  {
        "id":1,
@@ -90,7 +90,7 @@ La API contiene
     }
     
   
-\n
+
   #Dos productos 
  ->{
     "id": 1,
