@@ -8,13 +8,13 @@ Acontinuación se muestra un instructivo de como usar la API
 
 
 
-# Crear # Usuario
+# Crear  Usuario
 URL = http://localhost:8080/usuario - METODO POST 
 
 Json_body = {  "cedula": 1102866527,"nombre": "Andres","email": "Andres@gmail.com","direccion": "calle 27" }
 
 
-# Crear # un # producto 
+# Crear  un  producto 
 
 URL=  http://localhost:8080/productos - METODO POST
 
@@ -42,13 +42,13 @@ Json_Body = {
 
 
 
-#Obtener Factura
+# Obtener Factura
 URL=  http://localhost:8080/editarCompra/{id_usuario}  - METODO GET
 
 
 
 
-#Eliminar Producto 
+# Eliminar Producto 
 URL = http://localhost:8080/editarCompra/{id_usuario} - METODO DELETE 
 Json_Body = {
     "usuario": {
@@ -73,7 +73,7 @@ Json_Body = {
 La API contiene 
 
 
-#Dos usuarios 
+# Dos usuarios 
 ->  {
        "id":1,
         "cedula": 1102866527,
@@ -91,7 +91,7 @@ La API contiene
     
   
 
-  #Dos productos 
+  # Dos productos 
  ->{
     "id": 1,
     "nombre": "Carne",
